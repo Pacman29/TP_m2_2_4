@@ -2,26 +2,25 @@
 #include <vector>
 using namespace std;
 
-struct HeapElem
-{
-    int value; //ключ (значение)
-    int index; //индекс
-};
-
 //класс Max-кучи
-class CHeap
+class Heap
 {
 public:
+    typedef struct
+    {
+        int value;
+        int index;
+    } HeapElem;
     void insert(HeapElem value );
     void pop(void);
     HeapElem max(void);
-    void siftDown( int i);
+    void sift_down( int i);
 private:
 
     vector<HeapElem> buffer;
 };
 
-void CHeap::insert( HeapElem value )
+void Heap::insert( HeapElem value )
 {
     buffer.push_back( value );
     int i = buffer.size() - 1;
@@ -32,76 +31,63 @@ void CHeap::insert( HeapElem value )
     }
 }
 
-HeapElem CHeap::max()
+Heap::HeapElem Heap::max()
 {
     return buffer[0];
 }
-//просеивает элемент с индексом index на свое место в куче array
-void CHeap::siftDown(int i)
+
+void Heap::sift_down(int i)
 {
-    int maxChild = 0;
-    int indexMaxChild = 0;
-    while( 2 * i + 1 < buffer.size() )
+    int index_max = 0;
+    int left;
+    while( (left = 2 * i + 1) < buffer.size() )
     {
-        if( 2 * i + 1 == buffer.size() - 1 )
-        {
-            maxChild = buffer[2 * i + 1].value;
-            indexMaxChild = 2 * i + 1;
-        }
+        if( left == buffer.size() - 1 )
+            index_max = left;
         else
-        {
-            if( buffer[2 * i + 1].value < buffer[2 * i + 2].value )
-            {
-                maxChild = buffer[2 * i + 2].value;
-                indexMaxChild = 2 * i + 2;
-            }
-            else
-            {
-                maxChild = buffer[2 * i + 1].value;
-                indexMaxChild = 2 * i + 1;
-            }
-        }
-        if( buffer[i].value < maxChild )
-            std::swap(buffer[i], buffer[indexMaxChild]);
+            index_max = (buffer[left].value < buffer[left+1].value) ?
+                                    (left+1) : (left);
+
+        if( buffer[i].value < buffer[index_max].value )
+            std::swap(buffer[i], buffer[index_max]);
         else
             break;
-        i = indexMaxChild;
+        i = index_max;
     }
 }
 
-void CHeap::pop()
+void Heap::pop()
 {
     std::swap( buffer[0], buffer[ buffer.size() - 1 ] );
     buffer.pop_back();
-    siftDown(0);
+    sift_down(0);
 }
 
 int main()
 {
     int n = 0;
     cin >> n;
-    HeapElem *Arr = new HeapElem[n];
+    Heap::HeapElem *Arr = new Heap::HeapElem[n];
 
     for( int i = 0; i < n; i++ )
     {
         cin >> Arr[i].value;
         Arr[i].index = i;
     }
-  //размер окна
     int k = 0;
     cin >> k;
-    CHeap WHeap;
+    Heap my_heap;
 
     for( int i = 0; i < k; i++ )
-        WHeap.insert( Arr[i] );
+        my_heap.insert( Arr[i] );
 
-    cout << WHeap.max().value << " ";
+    cout << my_heap.max().value << " ";
     for(int i = k; i<n; ++i)
     {
-        WHeap.insert( Arr[i] );
-        while( WHeap.max().index <= ( i - k ) )
-            WHeap.pop();
-        cout << WHeap.max().value << " ";
+        my_heap.insert( Arr[i] );
+        while( my_heap.max().index <= ( i - k ) )
+            my_heap.pop();
+        cout << my_heap.max().value << " ";
     }
     delete[] Arr;
     return 0;
